@@ -116,9 +116,25 @@ jobs:
         id: previous
         run: |
           previous_revision=""
+          image_reference="$IMAGE_REPOSITORY:$IMAGE_TAGS"
+
+          if manifest=$(docker buildx imagetools inspect \
+            "$image_reference" \
+            --format '{{json .Manifest}}' 2>/dev/null); then
+            platform_digest=$(jq -r '
+              [.manifests[]?
+                | select(.platform.os == "linux" and .platform.architecture == "amd64")
+                | .digest]
+              | first // empty
+            ' <<< "$manifest")
+
+            if [[ -n "$platform_digest" ]]; then
+              image_reference="$IMAGE_REPOSITORY@$platform_digest"
+            fi
+          fi
 
           if labels=$(docker buildx imagetools inspect \
-            "$IMAGE_REPOSITORY:$IMAGE_TAGS" \
+            "$image_reference" \
             --format '{{json .Image.Config.Labels}}' 2>/dev/null); then
             candidate=$(jq -r '."org.opencontainers.image.revision" // empty' <<< "$labels")
             if [[ "$candidate" =~ ^[0-9a-f]{40}$ ]]; then
