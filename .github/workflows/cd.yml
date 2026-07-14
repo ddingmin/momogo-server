@@ -49,6 +49,7 @@ jobs:
       IMAGE_REPOSITORY: ghcr.io/nexters/momogo-server
       IMAGE_REVISION: ${{ inputs.revision || github.sha }}
       IMAGE_TAGS: ${{ inputs.target }}
+      IMAGE_ARCHITECTURES: amd64,arm64
       SOURCE_BRANCH: ${{ inputs.ref_name || github.ref_name }}
 
     steps:
