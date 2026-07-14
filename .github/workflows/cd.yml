@@ -46,13 +46,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      IMAGE_REPOSITORY: ghcr.io/nexters/momogo-server
       IMAGE_REVISION: ${{ inputs.revision || github.sha }}
       IMAGE_TAGS: ${{ inputs.target }}
       IMAGE_ARCHITECTURES: amd64,arm64
       SOURCE_BRANCH: ${{ inputs.ref_name || github.ref_name }}
 
     steps:
+      - name: Configure image repository
+        run: echo "IMAGE_REPOSITORY=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
       - name: Validate publish target
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
